@@ -177,16 +177,22 @@ st.markdown("""
   button[data-testid^="stBaseButton"]:focus-visible { outline:none !important;
       box-shadow:0 0 0 3px #0F0D17, 0 0 0 5px #B8AEFF !important; }
   /* ---------- tabs as a segmented pill ---------- */
-  div[data-testid="stTabs"] div[role="tablist"] { gap:4px; background:#15121E; border:1px solid var(--line);
-      border-radius:999px; padding:5px; width:fit-content; max-width:100%; }
-  div[data-testid="stTabs"] button[role="tab"] { border-radius:999px; padding:.5rem 1.2rem; height:auto;
-      transition: background .25s ease, color .25s ease; }
-  div[data-testid="stTabs"] button[role="tab"] p { font-size:.95rem; font-weight:500; color:var(--muted); }
-  div[data-testid="stTabs"] button[role="tab"]:hover p { color:var(--text); }
-  div[data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
-      background:linear-gradient(120deg, rgba(123,108,255,.35), rgba(224,98,201,.25)); }
-  div[data-testid="stTabs"] button[role="tab"][aria-selected="true"] p { color:#fff; }
-  div[data-baseweb="tab-highlight"], div[data-baseweb="tab-border"] { display:none; }
+  div[data-testid="stTabs"] [role="tablist"] { gap:6px !important; background:#15121E; border:1px solid var(--line);
+      border-radius:999px; padding:6px; width:fit-content; max-width:100%; margin-bottom:.6rem;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03); }
+  div[data-testid="stTabs"] [role="tablist"]::after { display:none !important; }
+  div[data-testid="stTabs"] [data-testid="stTab"] { height:auto !important; padding:.62rem 1.35rem !important;
+      border-radius:999px; color:var(--muted) !important; font-weight:500;
+      transition: background .25s ease, color .25s ease, box-shadow .25s ease; }
+  div[data-testid="stTabs"] [data-testid="stTab"] p { color:inherit !important; font-size:.95rem !important;
+      font-weight:500; margin:0; }
+  div[data-testid="stTabs"] [data-testid="stTab"][data-hovered] { color:var(--text) !important;
+      background:rgba(255,255,255,.04); }
+  div[data-testid="stTabs"] [data-testid="stTab"][data-selected] { color:#fff !important;
+      background:linear-gradient(120deg,#6D5DFC 0%,#9B6BFF 55%,#C865D6 100%);
+      box-shadow:0 8px 22px -10px rgba(123,108,255,.95), inset 0 1px 0 rgba(255,255,255,.22); }
+  div[data-testid="stTabs"] [data-testid="stTab"][data-focus-visible] { box-shadow:0 0 0 2px #0F0D17, 0 0 0 4px #B8AEFF !important; }
+  div[data-testid="stTabs"] .react-aria-SelectionIndicator { display:none !important; }
   /* ---------- radio + toggle accents ---------- */
   div[data-testid="stRadio"] label p, div[data-testid="stCheckbox"] label p { font-size:.9rem; }
   @media (prefers-reduced-motion: reduce){
