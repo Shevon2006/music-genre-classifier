@@ -73,23 +73,23 @@ st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root { --ink:#0F0D17; --panel:#17141F; --line:#2A2638; --text:#EEEAF6; --muted:#9891AD; --brand:#7B6CFF; }
-  .stApp { background:
-      radial-gradient(1200px 500px at 85% -10%, rgba(123,108,255,.16), transparent 60%),
-      var(--ink); color: var(--text); }
+  .stApp { color: var(--text); }
   html, body, [class*="css"], .stMarkdown, label, p { font-family: 'Inter', system-ui, sans-serif; }
   .block-container { padding-top: 2.2rem; max-width: 1280px; }
   header[data-testid="stHeader"] { background: transparent; }
   #MainMenu, footer { visibility: hidden; }
-  .block-container { position:relative; z-index:1; }
-  .ambient { position:fixed; inset:0; z-index:-1; pointer-events:none; overflow:hidden; }
-  .ambient img { position:absolute; top:0; left:0; opacity:0; will-change:transform, opacity;
-      animation: drift var(--d) linear var(--delay) infinite; filter: blur(var(--b)) saturate(.9); }
+  html, body { background: radial-gradient(1200px 500px at 85% -10%, rgba(123,108,255,.16), transparent 60%), #0F0D17 !important; }
+  .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] { background: transparent !important; }
+  .stApp { position:relative; z-index:1; }
+  #ambient-root { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+  #ambient-root img { position:absolute; top:0; left:0; height:auto; opacity:0; will-change:transform, opacity;
+      animation: drift var(--d) linear var(--delay) infinite; filter: blur(var(--b)); }
   @keyframes drift {
-      0%   { transform: translate(var(--x0), var(--y0)) rotate(var(--r0)) scale(var(--s)); opacity:0; }
+      0%   { transform: translate(var(--x0), var(--y0)) rotate(var(--r0)); opacity:0; }
       12%  { opacity: var(--o); }
       80%  { opacity: var(--o); }
-      100% { transform: translate(var(--x1), var(--y1)) rotate(var(--r1)) scale(var(--s)); opacity:0; } }
-  @media (prefers-reduced-motion: reduce) { .ambient { display:none; } }
+      100% { transform: translate(var(--x1), var(--y1)) rotate(var(--r1)); opacity:0; } }
+  @media (prefers-reduced-motion: reduce) { #ambient-root { display:none; } }
   .hero { position:relative; border-radius:22px; overflow:hidden; border:1px solid var(--line);
           margin-bottom:1.8rem; box-shadow:0 30px 60px -30px rgba(0,0,0,.8); }
   .hero img { display:block; width:100%; height:auto; }
@@ -256,7 +256,17 @@ def logo_data_uri():
     img = BASE_DIR / "spotify.png"
     if not img.exists():
         return ""
-    return "data:image/png;base64," + base64.b64encode(img.read_bytes()).decode()
+    try:
+        from io import BytesIO
+        from PIL import Image
+        im = Image.open(img).convert("RGBA")
+        im.thumbnail((160, 160))
+        buf = BytesIO()
+        im.save(buf, format="PNG", optimize=True)
+        data = buf.getvalue()
+    except Exception:
+        data = img.read_bytes()
+    return "data:image/png;base64," + base64.b64encode(data).decode()
 
 
 @st.cache_data
@@ -528,23 +538,49 @@ def show_stage(body_html):
         components.html(body_html, height=STAGE_HEIGHT, scrolling=False)
 
 
-# Ambient background: a few logos drifting slowly across the page -------------
+# Ambient background: a few logos drifting slowly behind the page ---------------
 AMBIENT = [
-    # size px, start x/y, end x/y, start/end rotation, duration, delay, opacity, blur
-    (64,  "-10vw", "18vh", "105vw", "62vh", "-18deg",  "24deg", "38s",  "0s",   .16, "0px"),
-    (40,  "108vw", "8vh",  "-12vw", "40vh",  "30deg", "-40deg", "46s", "-12s",  .10, "1.5px"),
-    (88,  "20vw", "110vh", "70vw",  "-15vh", "-8deg",  "35deg", "52s", "-25s",  .08, "3px"),
-    (52,  "75vw", "-12vh", "30vw",  "112vh", "45deg",  "-5deg", "42s", "-6s",   .13, "0.5px"),
-    (34,  "-8vw", "85vh",  "104vw", "30vh",  "-35deg", "15deg", "34s", "-19s",  .12, "1px"),
+    # width px, start x/y, end x/y, start/end rotation, duration, delay, opacity, blur
+    (70,  "-10vw", "18vh",  "105vw", "62vh",  "-18deg",  "24deg", "38s",   "0s", .26, "0px"),
+    (44,  "108vw", "8vh",   "-12vw", "40vh",   "30deg", "-40deg", "46s", "-12s", .18, "1px"),
+    (96,  "20vw",  "110vh", "70vw",  "-15vh",  "-8deg",  "35deg", "52s", "-25s", .12, "3px"),
+    (56,  "75vw",  "-12vh", "30vw",  "112vh",  "45deg",  "-5deg", "42s",  "-6s", .22, "0.5px"),
+    (38,  "-8vw",  "85vh",  "104vw", "30vh",  "-35deg",  "15deg", "34s", "-19s", .20, "0px"),
 ]
-if logo_data_uri():
-    imgs = "".join(
-        f'<img src="{logo_data_uri()}" alt="" width="{size}" height="{size}" style="'
-        f'--x0:{x0};--y0:{y0};--x1:{x1};--y1:{y1};--r0:{r0};--r1:{r1};'
-        f'--d:{d};--delay:{delay};--o:{o};--b:{b};--s:1">'
-        for size, x0, y0, x1, y1, r0, r1, d, delay, o, b in AMBIENT
-    )
-    st.markdown(f'<div class="ambient" aria-hidden="true">{imgs}</div>', unsafe_allow_html=True)
+
+
+def ambient_layer():
+    src = logo_data_uri()
+    if not src:
+        return
+    specs = json.dumps([
+        dict(w=w, style=(f"width:{w}px;--x0:{x0};--y0:{y0};--x1:{x1};--y1:{y1};"
+                         f"--r0:{r0};--r1:{r1};--d:{d};--delay:{delay};--o:{o};--b:{b}"))
+        for w, x0, y0, x1, y1, r0, r1, d, delay, o, b in AMBIENT
+    ])
+    script = f"""
+<script>
+(function () {{
+  if (document.getElementById('ambient-root')) return;
+  const root = document.createElement('div');
+  root.id = 'ambient-root';
+  root.setAttribute('aria-hidden', 'true');
+  const src = {json.dumps(src)};
+  for (const spec of {specs}) {{
+    const img = document.createElement('img');
+    img.src = src; img.alt = ''; img.setAttribute('style', spec.style);
+    root.appendChild(img);
+  }}
+  document.body.prepend(root);
+}})();
+</script>"""
+    try:
+        st.html(script, unsafe_allow_javascript=True)
+    except TypeError:
+        pass  # older Streamlit without script support: skip the effect
+
+
+ambient_layer()
 
 # Header -----------------------------------------------------------------------
 if hero_data_uri():
