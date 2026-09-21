@@ -112,22 +112,87 @@ st.markdown("""
   .brand .eq i:nth-child(4){animation-delay:.45s} .brand .eq i:nth-child(5){animation-delay:.6s}
   @keyframes bob { 0%,100%{height:8px} 50%{height:34px} }
   @media (prefers-reduced-motion: reduce){ .brand .eq i{animation:none;height:18px} }
-  div[data-testid="stVerticalBlockBorderWrapper"] { background: var(--panel);
-      border:1px solid var(--line) !important; border-radius:18px; }
-  .group-title { font-family:'Bricolage Grotesque',sans-serif; font-size:1.15rem; font-weight:500;
-                 margin:0 0 .15rem 0; }
+  /* ---------- panels (bordered containers holding a group title) ---------- */
+  div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .group-title) {
+      background: linear-gradient(180deg, #1A1725 0%, #15121E 100%);
+      border: 1px solid var(--line) !important; border-radius: 20px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 20px 40px -28px rgba(0,0,0,.9); }
+  .group-title { font-family:'Bricolage Grotesque',sans-serif; font-size:1.15rem; font-weight:500; margin:0 0 .15rem 0; }
   .group-sub { color:var(--muted); font-size:.85rem; margin:0 0 .6rem 0; }
-  div[data-testid="stSlider"] label p { font-size:.9rem; color:var(--text); }
-  div[data-baseweb="slider"] div[role="slider"] { background: var(--brand); box-shadow: 0 0 0 5px rgba(123,108,255,.2); }
-  div.stButton > button { border-radius:999px; border:1px solid var(--line); background:#1E1A2B;
-      color:var(--text); font-weight:500; padding:.35rem 1rem; transition: border-color .15s, background .15s; }
-  div.stButton > button:hover { border-color: var(--brand); color:#fff; }
-  div.stButton > button[kind="primary"] { background: var(--brand); border:none; color:#fff;
-      font-weight:600; font-size:1.05rem; padding:.8rem 1rem; border-radius:14px;
-      box-shadow: 0 10px 30px -10px rgba(123,108,255,.8); }
-  div.stButton > button[kind="primary"]:hover { background:#8E81FF; }
-  button[data-baseweb="tab"] p { font-size:1rem; }
-  div[data-baseweb="tab-highlight"] { background: var(--brand); }</style>
+  /* ---------- labels ---------- */
+  div[data-testid="stWidgetLabel"] p { font-size:.86rem !important; color:#CFC9DD !important; font-weight:500; }
+  /* ---------- sliders ---------- */
+  div[data-testid="stSlider"] div[role="slider"] {
+      width:18px; height:18px; background:#fff !important; border:4px solid var(--brand);
+      box-shadow:0 0 0 6px rgba(123,108,255,.18), 0 4px 12px rgba(0,0,0,.5);
+      transition: box-shadow .2s ease, transform .2s ease; }
+  div[data-testid="stSlider"] div[role="slider"]:hover,
+  div[data-testid="stSlider"] div[role="slider"]:focus-visible {
+      transform: scale(1.12); box-shadow:0 0 0 9px rgba(123,108,255,.25), 0 4px 14px rgba(0,0,0,.5); outline:none; }
+  div[data-testid="stSliderThumbValue"] { font-variant-numeric: tabular-nums; font-weight:600; color:#C9C0FF !important;
+      font-size:.8rem; }
+  div[data-testid="stSliderTickBar"] { color:#6F6886 !important; font-size:.72rem; }
+  /* ---------- selectboxes and text inputs ---------- */
+  div[data-baseweb="select"] > div, div[data-baseweb="input"], div[data-baseweb="base-input"] {
+      background:#1A1725 !important; border-radius:12px !important; border-color:var(--line) !important;
+      transition: border-color .2s ease, box-shadow .2s ease; }
+  div[data-baseweb="select"] > div:hover, div[data-baseweb="input"]:hover { border-color:#4A4166 !important; }
+  div[data-baseweb="select"]:focus-within > div, div[data-baseweb="input"]:focus-within {
+      border-color:var(--brand) !important; box-shadow:0 0 0 4px rgba(123,108,255,.18); }
+  ul[role="listbox"] { background:#1A1725 !important; border:1px solid var(--line); border-radius:12px; }
+  ul[role="listbox"] li[aria-selected="true"] { background:rgba(123,108,255,.18) !important; }
+  /* ---------- expander ---------- */
+  div[data-testid="stExpander"] details { background:#15121E; border:1px solid var(--line) !important;
+      border-radius:16px !important; overflow:hidden; }
+  div[data-testid="stExpander"] summary { padding:.85rem 1rem; transition: background .2s ease; }
+  div[data-testid="stExpander"] summary:hover { background:rgba(123,108,255,.07); }
+  div[data-testid="stExpander"] summary p { font-weight:500; }
+  /* ---------- secondary buttons (presets) ---------- */
+  button[data-testid="stBaseButton-secondary"] {
+      border-radius:999px !important; border:1px solid var(--line) !important;
+      background:rgba(255,255,255,.025) !important; color:#DAD5E8 !important;
+      font-weight:500; font-size:.88rem; padding:.45rem .9rem !important;
+      transition: border-color .2s ease, background .2s ease, transform .2s ease, box-shadow .2s ease; }
+  button[data-testid="stBaseButton-secondary"]:hover {
+      border-color:rgba(123,108,255,.65) !important; background:rgba(123,108,255,.1) !important;
+      color:#fff !important; transform: translateY(-1px); box-shadow:0 8px 20px -12px rgba(123,108,255,.9); }
+  button[data-testid="stBaseButton-secondary"]:active { transform: translateY(0) scale(.98); }
+  /* ---------- primary button ---------- */
+  button[data-testid="stBaseButton-primary"] {
+      position:relative; overflow:hidden; border:none !important; border-radius:16px !important;
+      padding:.95rem 1rem !important; color:#fff !important; font-weight:600; font-size:1.05rem; letter-spacing:.01em;
+      background:linear-gradient(120deg,#6D5DFC 0%,#9B6BFF 45%,#E062C9 100%) !important; background-size:180% 100% !important;
+      box-shadow:0 14px 34px -14px rgba(123,108,255,.95), inset 0 1px 0 rgba(255,255,255,.25);
+      transition: background-position .5s ease, transform .2s ease, box-shadow .2s ease; }
+  button[data-testid="stBaseButton-primary"]::after {
+      content:""; position:absolute; top:0; left:-60%; width:40%; height:100%;
+      background:linear-gradient(100deg, transparent, rgba(255,255,255,.35), transparent);
+      transform:skewX(-20deg); transition:left .7s ease; pointer-events:none; }
+  button[data-testid="stBaseButton-primary"]:hover {
+      background-position:100% 0 !important; transform:translateY(-2px);
+      box-shadow:0 20px 40px -14px rgba(160,100,255,1), inset 0 1px 0 rgba(255,255,255,.3); }
+  button[data-testid="stBaseButton-primary"]:hover::after { left:120%; }
+  button[data-testid="stBaseButton-primary"]:active { transform:translateY(0) scale(.985); }
+  button[data-testid="stBaseButton-primary"]:disabled { opacity:.45; box-shadow:none; transform:none; }
+  button[data-testid^="stBaseButton"]:focus-visible { outline:none !important;
+      box-shadow:0 0 0 3px #0F0D17, 0 0 0 5px #B8AEFF !important; }
+  /* ---------- tabs as a segmented pill ---------- */
+  div[data-testid="stTabs"] div[role="tablist"] { gap:4px; background:#15121E; border:1px solid var(--line);
+      border-radius:999px; padding:5px; width:fit-content; max-width:100%; }
+  div[data-testid="stTabs"] button[role="tab"] { border-radius:999px; padding:.5rem 1.2rem; height:auto;
+      transition: background .25s ease, color .25s ease; }
+  div[data-testid="stTabs"] button[role="tab"] p { font-size:.95rem; font-weight:500; color:var(--muted); }
+  div[data-testid="stTabs"] button[role="tab"]:hover p { color:var(--text); }
+  div[data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
+      background:linear-gradient(120deg, rgba(123,108,255,.35), rgba(224,98,201,.25)); }
+  div[data-testid="stTabs"] button[role="tab"][aria-selected="true"] p { color:#fff; }
+  div[data-baseweb="tab-highlight"], div[data-baseweb="tab-border"] { display:none; }
+  /* ---------- radio + toggle accents ---------- */
+  div[data-testid="stRadio"] label p, div[data-testid="stCheckbox"] label p { font-size:.9rem; }
+  @media (prefers-reduced-motion: reduce){
+    button[data-testid^="stBaseButton"], button[data-testid^="stBaseButton"]::after,
+    div[data-testid="stSlider"] div[role="slider"] { transition:none !important; } }
+</style>
 """, unsafe_allow_html=True)
 
 
