@@ -47,25 +47,55 @@ GENRE_BLURBS = {
 
 # Slider defaults and presets --------------------------------------------------
 DEFAULTS = dict(dance=0.55, energy=0.55, valence=0.50, acoustic=0.35, instr=0.10,
-                speech=0.07, live=0.15, tempo=120, loud=-9.0, minutes=3.3, popl=40)
+                speech=0.07, live=0.15, tempo=120, loud=-9.0, minutes=3.3, popl=40,
+                explicit=False, mode_name="Major")
+
+# Each preset is built around the typical values of one genre in the dataset,
+# and was checked to predict that genre with high confidence.
 PRESETS = {
-    "Festival drop":  dict(dance=0.82, energy=0.95, valence=0.55, acoustic=0.01, instr=0.55,
-                           speech=0.06, live=0.25, tempo=128, loud=-3.5),
-    "Late-night piano": dict(dance=0.25, energy=0.07, valence=0.20, acoustic=0.98, instr=0.92,
-                             speech=0.04, live=0.10, tempo=72, loud=-28.0),
-    "Mosh pit":       dict(dance=0.40, energy=0.97, valence=0.35, acoustic=0.01, instr=0.10,
-                           speech=0.09, live=0.30, tempo=165, loud=-3.8),
-    "Stand-up set":   dict(dance=0.60, energy=0.55, valence=0.60, acoustic=0.75, instr=0.00,
-                           speech=0.92, live=0.85, tempo=100, loud=-15.0),
+    "Festival":    dict(genre="edm", icon=":material/graphic_eq:",
+                        values=dict(dance=0.68, energy=0.90, valence=0.45, acoustic=0.02, instr=0.40,
+                                    speech=0.05, live=0.15, tempo=126, loud=-4.5, popl=50,
+                                    minutes=3.2, explicit=False, mode_name="Major")),
+    "Piano":       dict(genre="classical", icon=":material/piano:",
+                        values=dict(dance=0.35, energy=0.10, valence=0.30, acoustic=0.98, instr=0.90,
+                                    speech=0.04, live=0.10, tempo=96, loud=-22.0, popl=5,
+                                    minutes=3.5, explicit=False, mode_name="Major")),
+    "Mosh pit":    dict(genre="heavy-metal", icon=":material/bolt:",
+                        values=dict(dance=0.42, energy=0.96, valence=0.35, acoustic=0.00, instr=0.05,
+                                    speech=0.07, live=0.22, tempo=150, loud=-4.5, popl=25,
+                                    minutes=4.2, explicit=False, mode_name="Minor")),
+    "Stand-up":    dict(genre="comedy", icon=":material/mic:",
+                        values=dict(dance=0.57, energy=0.72, valence=0.45, acoustic=0.80, instr=0.00,
+                                    speech=0.92, live=0.75, tempo=95, loud=-10.0, popl=22,
+                                    minutes=3.3, explicit=True, mode_name="Major")),
+    "Lullaby":     dict(genre="sleep", icon=":material/bedtime:",
+                        values=dict(dance=0.15, energy=0.08, valence=0.05, acoustic=0.90, instr=0.90,
+                                    speech=0.05, live=0.15, tempo=80, loud=-25.0, popl=35,
+                                    minutes=2.7, explicit=False, mode_name="Major")),
+    "Block party": dict(genre="reggaeton", icon=":material/celebration:",
+                        values=dict(dance=0.78, energy=0.75, valence=0.68, acoustic=0.12, instr=0.00,
+                                    speech=0.09, live=0.12, tempo=98, loud=-4.6, popl=3,
+                                    minutes=3.5, explicit=False, mode_name="Major")),
 }
 
 for k, v in DEFAULTS.items():
     st.session_state.setdefault(k, v)
+st.session_state.setdefault("active_preset", None)
 
 
 def apply_preset(name):
-    for k, v in PRESETS[name].items():
+    for k, v in PRESETS[name]["values"].items():
         st.session_state[k] = v
+    st.session_state.active_preset = name
+
+
+def clear_preset():
+    st.session_state.active_preset = None
+
+
+def preset_key(name):
+    return "preset_" + name.lower().replace(" ", "_").replace("-", "_")
 
 
 # Styling ----------------------------------------------------------------------
@@ -81,13 +111,22 @@ st.markdown("""
   html, body { background: radial-gradient(1200px 500px at 85% -10%, rgba(123,108,255,.16), transparent 60%), #0F0D17 !important; }
   .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] { background: transparent !important; }
   #ambient-root { position:fixed; inset:0; z-index:-1; pointer-events:none; overflow:hidden; }
-  #ambient-root img { position:absolute; top:0; left:0; height:auto; opacity:0; will-change:transform, opacity;
-      animation: drift var(--d) linear var(--delay) infinite; filter: blur(var(--b)); }
-  @keyframes drift {
-      0%   { transform: translate(var(--x0), var(--y0)) rotate(var(--r0)); opacity:0; }
-      12%  { opacity: var(--o); }
-      80%  { opacity: var(--o); }
-      100% { transform: translate(var(--x1), var(--y1)) rotate(var(--r1)); opacity:0; } }
+  #ambient-root .lane { position:absolute; left:0; top:var(--top); opacity:0; will-change:transform, opacity;
+      animation: travel var(--d) linear var(--delay) infinite; }
+  #ambient-root .lane.rev { animation-name: travel-rev; }
+  #ambient-root img { display:block; height:auto; opacity:var(--o); filter: blur(var(--b));
+      animation: sway var(--sd) ease-in-out var(--delay) infinite alternate; }
+  @keyframes travel {
+      0%   { transform: translateX(-12vw); opacity:0; }
+      10%  { opacity:1; }  90% { opacity:1; }
+      100% { transform: translateX(108vw); opacity:0; } }
+  @keyframes travel-rev {
+      0%   { transform: translateX(108vw); opacity:0; }
+      10%  { opacity:1; }  90% { opacity:1; }
+      100% { transform: translateX(-12vw); opacity:0; } }
+  @keyframes sway {
+      from { transform: translateY(-10px) rotate(var(--r0)); }
+      to   { transform: translateY(10px)  rotate(var(--r1)); } }
   @media (prefers-reduced-motion: reduce) { #ambient-root { display:none; } }
   .hero { position:relative; border-radius:22px; overflow:hidden; border:1px solid var(--line);
           margin-bottom:1.8rem; box-shadow:0 30px 60px -30px rgba(0,0,0,.8); }
@@ -175,16 +214,24 @@ st.markdown("""
   div[data-testid="stExpander"] summary { padding:.85rem 1rem; transition: background .2s ease; }
   div[data-testid="stExpander"] summary:hover { background:rgba(123,108,255,.07); }
   div[data-testid="stExpander"] summary p { font-weight:500; }
-  /* ---------- secondary buttons (presets) ---------- */
+  /* ---------- secondary buttons (preset chips) ---------- */
+  .preset-title { font-family:'Bricolage Grotesque',sans-serif; font-size:1.15rem; font-weight:500; margin:0 0 .15rem 0; }
   button[data-testid="stBaseButton-secondary"] {
-      border-radius:999px !important; border:1px solid var(--line) !important;
-      background:rgba(255,255,255,.025) !important; color:#DAD5E8 !important;
-      font-weight:500; font-size:.88rem; padding:.45rem .9rem !important;
-      transition: border-color .2s ease, background .2s ease, transform .2s ease, box-shadow .2s ease; }
+      border-radius:14px !important; border:1px solid var(--line) !important; min-height:3rem;
+      background:linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.012)) !important;
+      color:#DAD5E8 !important; font-weight:500; font-size:.92rem; padding:.55rem .9rem !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+      transition: border-color .25s ease, background .25s ease, transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s ease; }
+  button[data-testid="stBaseButton-secondary"] p { white-space:nowrap !important; overflow:visible !important;
+      text-overflow:clip !important; font-size:.92rem; }
+  button[data-testid="stBaseButton-secondary"] span[data-testid="stIconMaterial"] { color:#A99BFF; font-size:1.2rem;
+      transition: transform .25s cubic-bezier(.2,.8,.2,1), color .25s ease; }
   button[data-testid="stBaseButton-secondary"]:hover {
-      border-color:rgba(123,108,255,.65) !important; background:rgba(123,108,255,.1) !important;
-      color:#fff !important; transform: translateY(-1px); box-shadow:0 8px 20px -12px rgba(123,108,255,.9); }
-  button[data-testid="stBaseButton-secondary"]:active { transform: translateY(0) scale(.98); }
+      border-color:rgba(123,108,255,.7) !important;
+      background:linear-gradient(180deg, rgba(123,108,255,.16), rgba(123,108,255,.05)) !important;
+      color:#fff !important; transform: translateY(-2px); box-shadow:0 12px 24px -14px rgba(123,108,255,.95); }
+  button[data-testid="stBaseButton-secondary"]:hover span[data-testid="stIconMaterial"] { transform: scale(1.15) rotate(-6deg); color:#fff; }
+  button[data-testid="stBaseButton-secondary"]:active { transform: translateY(0) scale(.97); }
   /* ---------- primary button ---------- */
   button[data-testid="stBaseButton-primary"] {
       position:relative; overflow:hidden; border:none !important; border-radius:16px !important;
@@ -538,13 +585,17 @@ def show_stage(body_html):
 
 
 # Ambient background: a few logos drifting slowly behind the page ---------------
+# One logo per horizontal lane, so they never collide and cover the whole screen.
+# Lanes alternate direction; negative delays spread them across the width on load.
 AMBIENT = [
-    # width px, start x/y, end x/y, start/end rotation, duration, delay, opacity, blur
-    (70,  "-10vw", "18vh",  "105vw", "62vh",  "-18deg",  "24deg", "38s",   "0s", .26, "0px"),
-    (44,  "108vw", "8vh",   "-12vw", "40vh",   "30deg", "-40deg", "46s", "-12s", .18, "1px"),
-    (96,  "20vw",  "110vh", "70vw",  "-15vh",  "-8deg",  "35deg", "52s", "-25s", .12, "3px"),
-    (56,  "75vw",  "-12vh", "30vw",  "112vh",  "45deg",  "-5deg", "42s",  "-6s", .22, "0.5px"),
-    (38,  "-8vw",  "85vh",  "104vw", "30vh",  "-35deg",  "15deg", "34s", "-19s", .20, "0px"),
+    # lane top, width px, travel time, start offset, opacity, blur, tilt range, reverse
+    ("4vh",  46, "58s", "-8s",  .20, "0px",   ("-14deg", "10deg"), False),
+    ("17vh", 60, "72s", "-50s", .14, "1.5px", ("12deg", "-8deg"),  True),
+    ("31vh", 40, "64s", "-30s", .22, "0px",   ("-6deg", "16deg"),  False),
+    ("45vh", 72, "86s", "-70s", .10, "2.5px", ("8deg", "-12deg"),  True),
+    ("59vh", 50, "60s", "-18s", .18, "0.5px", ("-18deg", "6deg"),  False),
+    ("73vh", 64, "78s", "-44s", .13, "1.5px", ("10deg", "-14deg"), True),
+    ("87vh", 42, "66s", "-58s", .20, "0px",   ("-8deg", "12deg"),  False),
 ]
 
 
@@ -553,22 +604,30 @@ def ambient_layer():
     if not src:
         return
     specs = json.dumps([
-        dict(w=w, style=(f"width:{w}px;--x0:{x0};--y0:{y0};--x1:{x1};--y1:{y1};"
-                         f"--r0:{r0};--r1:{r1};--d:{d};--delay:{delay};--o:{o};--b:{b}"))
-        for w, x0, y0, x1, y1, r0, r1, d, delay, o, b in AMBIENT
+        dict(rev=rev, w=w,
+             lane=f"--top:{top};--d:{d};--delay:{delay}",
+             img=f"width:{w}px;--o:{o};--b:{b};--r0:{r0};--r1:{r1};--sd:{7 + i * 1.3:.1f}s;--delay:{delay}")
+        for i, (top, w, d, delay, o, b, (r0, r1), rev) in enumerate(AMBIENT)
     ])
     script = f"""
 <script>
 (function () {{
-  if (document.getElementById('ambient-root')) return;
+  const old = document.getElementById('ambient-root');
+  if (old && old.dataset.v === '2') return;
+  if (old) old.remove();
   const root = document.createElement('div');
   root.id = 'ambient-root';
+  root.dataset.v = '2';
   root.setAttribute('aria-hidden', 'true');
   const src = {json.dumps(src)};
   for (const spec of {specs}) {{
+    const lane = document.createElement('div');
+    lane.className = spec.rev ? 'lane rev' : 'lane';
+    lane.setAttribute('style', spec.lane);
     const img = document.createElement('img');
-    img.src = src; img.alt = ''; img.setAttribute('style', spec.style);
-    root.appendChild(img);
+    img.src = src; img.alt = ''; img.setAttribute('style', spec.img);
+    lane.appendChild(img);
+    root.appendChild(lane);
   }}
   document.body.prepend(root);
 }})();
@@ -617,48 +676,63 @@ with tab_build:
     left, right = st.columns([1, 1.15], gap="large")
 
     with left:
-        st.markdown('<p class="group-sub">Start from a preset, or set every control yourself.</p>',
+        st.markdown('<p class="preset-title">Start from a sound</p>'
+                    '<p class="group-sub">Pick a preset to load a typical track, then fine-tune it.</p>',
                     unsafe_allow_html=True)
-        pcols = st.columns(len(PRESETS))
-        for col, name in zip(pcols, PRESETS):
-            col.button(name, on_click=apply_preset, args=(name,), width="stretch")
+        names = list(PRESETS)
+        for row_start in range(0, len(names), 3):
+            cols = st.columns(3, gap="small")
+            for col, name in zip(cols, names[row_start:row_start + 3]):
+                col.button(name, key=preset_key(name), icon=PRESETS[name]["icon"],
+                           on_click=apply_preset, args=(name,), width="stretch")
+        active = st.session_state.active_preset
+        if active:
+            colour = GENRE_COLORS[PRESETS[active]["genre"]]
+            st.markdown(f"""<style>
+              .st-key-{preset_key(active)} button {{
+                border-color:{colour} !important;
+                background:linear-gradient(135deg, {colour}33, {colour}14) !important;
+                color:#fff !important; box-shadow:0 10px 26px -14px {colour} !important; }}
+              .st-key-{preset_key(active)} button span[data-testid="stIconMaterial"] {{ color:{colour} !important; }}
+            </style>""", unsafe_allow_html=True)
 
         with st.container(border=True):
             st.markdown('<p class="group-title">Feel</p>'
                         '<p class="group-sub">How it moves you</p>', unsafe_allow_html=True)
             c1, c2 = st.columns(2)
-            c1.slider("Danceability", 0.0, 1.0, step=0.01, key="dance")
-            c2.slider("Energy", 0.0, 1.0, step=0.01, key="energy")
-            c1.slider("Positivity", 0.0, 1.0, step=0.01, key="valence")
-            c2.slider("Tempo (BPM)", 40, 220, step=1, key="tempo")
+            c1.slider("Danceability", 0.0, 1.0, step=0.01, key="dance", on_change=clear_preset)
+            c2.slider("Energy", 0.0, 1.0, step=0.01, key="energy", on_change=clear_preset)
+            c1.slider("Positivity", 0.0, 1.0, step=0.01, key="valence", on_change=clear_preset)
+            c2.slider("Tempo (BPM)", 40, 220, step=1, key="tempo", on_change=clear_preset)
 
         with st.container(border=True):
             st.markdown('<p class="group-title">Texture</p>'
                         '<p class="group-sub">What it is made of</p>', unsafe_allow_html=True)
             c1, c2 = st.columns(2)
-            c1.slider("Acousticness", 0.0, 1.0, step=0.01, key="acoustic")
-            c2.slider("Instrumentalness", 0.0, 1.0, step=0.01, key="instr")
-            c1.slider("Speechiness", 0.0, 1.0, step=0.01, key="speech")
-            c2.slider("Loudness (dB)", -49.0, 2.0, step=0.5, key="loud")
+            c1.slider("Acousticness", 0.0, 1.0, step=0.01, key="acoustic", on_change=clear_preset)
+            c2.slider("Instrumentalness", 0.0, 1.0, step=0.01, key="instr", on_change=clear_preset)
+            c1.slider("Speechiness", 0.0, 1.0, step=0.01, key="speech", on_change=clear_preset)
+            c2.slider("Loudness (dB)", -49.0, 2.0, step=0.5, key="loud", on_change=clear_preset)
 
         with st.expander("More details"):
             c1, c2 = st.columns(2)
-            c1.slider("Liveness", 0.0, 1.0, step=0.01, key="live")
-            c2.slider("Popularity", 0, 100, key="popl")
-            c1.slider("Duration (minutes)", 0.5, 10.0, step=0.1, key="minutes")
+            c1.slider("Liveness", 0.0, 1.0, step=0.01, key="live", on_change=clear_preset)
+            c2.slider("Popularity", 0, 100, key="popl", on_change=clear_preset)
+            c1.slider("Duration (minutes)", 0.5, 10.0, step=0.1, key="minutes", on_change=clear_preset)
             key_names = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"]
             key = key_names.index(c2.selectbox("Key", key_names))
-            mode = 1 if c1.radio("Mode", ["Major", "Minor"], horizontal=True) == "Major" else 0
+            c1.radio("Mode", ["Major", "Minor"], horizontal=True, key="mode_name", on_change=clear_preset)
             time_signature = c2.selectbox("Beats per bar", [4, 3, 5, 1, 0])
-            explicit = c1.toggle("Explicit lyrics")
+            c1.toggle("Explicit lyrics", key="explicit", on_change=clear_preset)
 
         identify = st.button("Identify genre", type="primary", width="stretch")
 
     with right:
         if identify:
             s = st.session_state
-            raw = dict(popularity=s.popl, duration_ms=s.minutes * 60_000, explicit=explicit,
-                       danceability=s.dance, energy=s.energy, loudness=s.loud, mode=mode,
+            raw = dict(popularity=s.popl, duration_ms=s.minutes * 60_000, explicit=s.explicit,
+                       danceability=s.dance, energy=s.energy, loudness=s.loud,
+                       mode=1 if s.mode_name == "Major" else 0,
                        speechiness=s.speech, acousticness=s.acoustic, instrumentalness=s.instr,
                        liveness=s.live, valence=s.valence, tempo=s.tempo, key=key,
                        time_signature=time_signature)
