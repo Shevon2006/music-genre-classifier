@@ -80,6 +80,11 @@ st.markdown("""
   .block-container { padding-top: 2.2rem; max-width: 1280px; }
   header[data-testid="stHeader"] { background: transparent; }
   #MainMenu, footer { visibility: hidden; }
+  .hero { position:relative; border-radius:22px; overflow:hidden; border:1px solid var(--line);
+          margin-bottom:1.8rem; box-shadow:0 30px 60px -30px rgba(0,0,0,.8); }
+  .hero img { display:block; width:100%; height:auto; }
+  .hero::after { content:""; position:absolute; inset:auto 0 0 0; height:28%;
+          background:linear-gradient(to bottom, transparent, rgba(15,13,23,.55)); pointer-events:none; }
   .brand { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:1.4rem; }
   .brand h1 { font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:3rem;
               letter-spacing:-0.035em; margin:0; line-height:1; }
@@ -127,6 +132,14 @@ def audio_data_uri(genre):
     if not clip.exists() or clip.stat().st_size == 0:
         return ""
     return "data:audio/mpeg;base64," + base64.b64encode(clip.read_bytes()).decode()
+
+
+@st.cache_data
+def hero_data_uri():
+    img = BASE_DIR / "hero.jpg"
+    if not img.exists():
+        return ""
+    return "data:image/jpeg;base64," + base64.b64encode(img.read_bytes()).decode()
 
 
 try:
@@ -391,6 +404,11 @@ def show_stage(body_html):
 
 
 # Header -----------------------------------------------------------------------
+if hero_data_uri():
+    st.markdown(f'<div class="hero"><img src="{hero_data_uri()}" '
+                'alt="Audio features flowing into a model that sorts tracks by genre"></div>',
+                unsafe_allow_html=True)
+
 st.markdown("""
 <div class="brand">
   <div>
