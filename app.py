@@ -86,8 +86,25 @@ st.markdown("""
   .hero::after { content:""; position:absolute; inset:auto 0 0 0; height:28%;
           background:linear-gradient(to bottom, transparent, rgba(15,13,23,.55)); pointer-events:none; }
   .brand { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:1.4rem; }
-  .brand h1 { font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:3rem;
-              letter-spacing:-0.035em; margin:0; line-height:1; }
+  .brand h1 { font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:clamp(2.8rem,6vw,4.4rem);
+              letter-spacing:-0.045em; margin:0; line-height:1; padding-bottom:.08em; }
+  .brand h1 .w { display:inline-block; white-space:nowrap; }
+  .brand h1 .l { display:inline-block; opacity:0; transform:translateY(55%) scale(.96); filter:blur(8px);
+                 background:linear-gradient(100deg,#EEEAF6 0%,#EEEAF6 30%,#B8AEFF 42%,#FF5FA2 50%,#1FE0C4 58%,#EEEAF6 70%,#EEEAF6 100%);
+                 background-size:900% 100%; background-position:100% 0;
+                 -webkit-background-clip:text; background-clip:text; color:transparent;
+                 animation: rise .8s cubic-bezier(.2,.8,.2,1) forwards, sweep 7s 1.4s ease-in-out infinite; }
+  .brand h1 .gap { display:inline-block; width:.28em; }
+  @keyframes rise { to { opacity:1; transform:none; filter:none; } }
+  @keyframes sweep { 0% { background-position:100% 0; } 55%,100% { background-position:0% 0; } }
+  .brand .rule { height:3px; width:0; margin-top:.9rem; border-radius:3px;
+                 background:linear-gradient(90deg,#7B6CFF,#FF5FA2,#1FE0C4);
+                 animation: draw 1.1s .9s cubic-bezier(.2,.8,.2,1) forwards; }
+  @keyframes draw { to { width:120px; } }
+  @media (prefers-reduced-motion: reduce){
+    .brand h1 .l { animation:none; opacity:1; transform:none; filter:none; }
+    .brand .rule { animation:none; width:120px; }
+  }
   .brand p { color:var(--muted); margin:.5rem 0 0 0; font-size:1.02rem; max-width:560px; }
   .brand .eq { display:flex; gap:4px; align-items:flex-end; height:34px; }
   .brand .eq i { width:6px; border-radius:3px; background:var(--brand); animation: bob 1.1s ease-in-out infinite; }
@@ -409,10 +426,23 @@ if hero_data_uri():
                 'alt="Audio features flowing into a model that sorts tracks by genre"></div>',
                 unsafe_allow_html=True)
 
-st.markdown("""
+def animated_title(text):
+    words, i = [], 0
+    for word in text.split(" "):
+        letters = ""
+        for ch in word:
+            letters += (f'<span class="l" style="animation-delay:{0.15 + i * 0.05:.2f}s, '
+                        f'{1.4 + i * 0.05:.2f}s">{html.escape(ch)}</span>')
+            i += 1
+        words.append(f'<span class="w">{letters}</span>')
+    return '<span class="gap"></span>'.join(words)
+
+
+st.markdown(f"""
 <div class="brand">
   <div>
-    <h1>Genre Finder</h1>
+    <h1 aria-label="Genre Finder">{animated_title("Genre Finder")}</h1>
+    <div class="rule"></div>
     <p>Shape a track's sound with the controls, and the model will name its genre and play you a sample.</p>
   </div>
   <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
