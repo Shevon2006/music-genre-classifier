@@ -80,8 +80,7 @@ st.markdown("""
   #MainMenu, footer { visibility: hidden; }
   html, body { background: radial-gradient(1200px 500px at 85% -10%, rgba(123,108,255,.16), transparent 60%), #0F0D17 !important; }
   .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] { background: transparent !important; }
-  .stApp { position:relative; z-index:1; }
-  #ambient-root { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+  #ambient-root { position:fixed; inset:0; z-index:-1; pointer-events:none; overflow:hidden; }
   #ambient-root img { position:absolute; top:0; left:0; height:auto; opacity:0; will-change:transform, opacity;
       animation: drift var(--d) linear var(--delay) infinite; filter: blur(var(--b)); }
   @keyframes drift {
