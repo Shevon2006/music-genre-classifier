@@ -122,16 +122,35 @@ st.markdown("""
   /* ---------- labels ---------- */
   div[data-testid="stWidgetLabel"] p { font-size:.86rem !important; color:#CFC9DD !important; font-weight:500; }
   /* ---------- sliders ---------- */
-  div[data-testid="stSlider"] div[role="slider"] {
-      width:18px; height:18px; background:#fff !important; border:4px solid var(--brand);
-      box-shadow:0 0 0 6px rgba(123,108,255,.18), 0 4px 12px rgba(0,0,0,.5);
-      transition: box-shadow .2s ease, transform .2s ease; }
-  div[data-testid="stSlider"] div[role="slider"]:hover,
-  div[data-testid="stSlider"] div[role="slider"]:focus-visible {
-      transform: scale(1.12); box-shadow:0 0 0 9px rgba(123,108,255,.25), 0 4px 14px rgba(0,0,0,.5); outline:none; }
-  div[data-testid="stSliderThumbValue"] { font-variant-numeric: tabular-nums; font-weight:600; color:#C9C0FF !important;
-      font-size:.8rem; }
+  div[data-testid="stSlider"] { padding:.1rem .2rem .35rem; border-radius:14px; transition: background .3s ease; }
+  div[data-testid="stSlider"]:hover { background:rgba(123,108,255,.045); }
+  div[data-testid="stSlider"] div:has(> div > [data-testid="stSliderThumbValue"]) > div:first-child { height:6px !important; border-radius:999px; box-shadow: inset 0 1px 2px rgba(0,0,0,.55);
+      transition: filter .3s ease; }
+  div[data-testid="stSlider"] div:has(> div > [data-testid="stSliderThumbValue"]) > div:first-child::after { content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+      background:linear-gradient(90deg,#6D5DFC 0%,#A66BFF 45%,#FF5FA2 100%); mix-blend-mode:hue; }
+  div[data-testid="stSlider"]:hover div:has(> div > [data-testid="stSliderThumbValue"]) > div:first-child { filter: drop-shadow(0 0 6px rgba(123,108,255,.55)); }
+  div[data-testid="stSlider"] div:has(> [data-testid="stSliderThumbValue"]) { width:20px !important; height:20px !important; background:radial-gradient(circle at 35% 30%, #FFFFFF 0%, #E9E5FF 60%, #CFC6FF 100%) !important;
+      border:3px solid var(--brand) !important; box-shadow:0 0 0 0 rgba(123,108,255,.0), 0 4px 10px rgba(0,0,0,.55) !important;
+      transition: transform .22s cubic-bezier(.2,.8,.2,1), box-shadow .22s ease; cursor:grab; }
+  div[data-testid="stSlider"] div:has(> [data-testid="stSliderThumbValue"])[data-hovered] { transform:translate(-50%,-50%) scale(1.12) !important;
+      box-shadow:0 0 0 7px rgba(123,108,255,.18), 0 4px 12px rgba(0,0,0,.55) !important; }
+  div[data-testid="stSlider"] div:has(> [data-testid="stSliderThumbValue"])[data-dragging] { cursor:grabbing; transform:translate(-50%,-50%) scale(1.2) !important;
+      box-shadow:0 0 0 10px rgba(123,108,255,.22), 0 0 24px 4px rgba(123,108,255,.55), 0 4px 12px rgba(0,0,0,.55) !important; }
+  div[data-testid="stSlider"] div:has(> [data-testid="stSliderThumbValue"])[data-focus-visible] { box-shadow:0 0 0 3px #0F0D17, 0 0 0 5px #B8AEFF !important; }
+  div[data-testid="stSlider"] [data-testid="stSliderThumbValue"] { top:-2.35em !important; padding:.14rem .5rem; border-radius:8px;
+      background:#221D33; border:1px solid rgba(123,108,255,.45); color:#F3F0FF !important;
+      font-size:.74rem !important; font-weight:600 !important; font-variant-numeric:tabular-nums; letter-spacing:.01em;
+      box-shadow:0 6px 16px -6px rgba(0,0,0,.7); transition: transform .22s cubic-bezier(.2,.8,.2,1), background .22s ease; }
+  div[data-testid="stSlider"] [data-testid="stSliderThumbValue"]::after { content:""; position:absolute; left:50%; bottom:-4px; width:7px; height:7px;
+      background:inherit; border-right:1px solid rgba(123,108,255,.45); border-bottom:1px solid rgba(123,108,255,.45);
+      transform:translateX(-50%) rotate(45deg); }
+  div[data-testid="stSlider"] div:has(> [data-testid="stSliderThumbValue"])[data-dragging] > [data-testid="stSliderThumbValue"],
+  div[data-testid="stSlider"] div:has(> [data-testid="stSliderThumbValue"])[data-hovered] > [data-testid="stSliderThumbValue"] {
+      background:linear-gradient(120deg,#6D5DFC,#9B6BFF); border-color:transparent; transform:translateY(-3px); }
+  div[data-testid="stSlider"] div:has(> [data-testid="stSliderThumbValue"])[data-dragging] > [data-testid="stSliderThumbValue"]::after,
+  div[data-testid="stSlider"] div:has(> [data-testid="stSliderThumbValue"])[data-hovered] > [data-testid="stSliderThumbValue"]::after { background:#8A64FE; border-color:transparent; }
   div[data-testid="stSliderTickBar"] { color:#6F6886 !important; font-size:.72rem; }
+  div[data-testid="stSlider"] [data-testid="stWidgetLabel"] { margin-bottom:.9rem; }
   /* ---------- selectboxes and text inputs ---------- */
   div[data-baseweb="select"] > div, div[data-baseweb="input"], div[data-baseweb="base-input"] {
       background:#1A1725 !important; border-radius:12px !important; border-color:var(--line) !important;
