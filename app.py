@@ -80,7 +80,6 @@ st.markdown("""
   .block-container { padding-top: 2.2rem; max-width: 1280px; }
   header[data-testid="stHeader"] { background: transparent; }
   #MainMenu, footer { visibility: hidden; }
-
   .brand { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:1.4rem; }
   .brand h1 { font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:3rem;
               letter-spacing:-0.035em; margin:0; line-height:1; }
@@ -91,16 +90,13 @@ st.markdown("""
   .brand .eq i:nth-child(4){animation-delay:.45s} .brand .eq i:nth-child(5){animation-delay:.6s}
   @keyframes bob { 0%,100%{height:8px} 50%{height:34px} }
   @media (prefers-reduced-motion: reduce){ .brand .eq i{animation:none;height:18px} }
-
   div[data-testid="stVerticalBlockBorderWrapper"] { background: var(--panel);
       border:1px solid var(--line) !important; border-radius:18px; }
   .group-title { font-family:'Bricolage Grotesque',sans-serif; font-size:1.15rem; font-weight:500;
                  margin:0 0 .15rem 0; }
   .group-sub { color:var(--muted); font-size:.85rem; margin:0 0 .6rem 0; }
-
   div[data-testid="stSlider"] label p { font-size:.9rem; color:var(--text); }
   div[data-baseweb="slider"] div[role="slider"] { background: var(--brand); box-shadow: 0 0 0 5px rgba(123,108,255,.2); }
-
   div.stButton > button { border-radius:999px; border:1px solid var(--line); background:#1E1A2B;
       color:var(--text); font-weight:500; padding:.35rem 1rem; transition: border-color .15s, background .15s; }
   div.stButton > button:hover { border-color: var(--brand); color:#fff; }
@@ -108,10 +104,8 @@ st.markdown("""
       font-weight:600; font-size:1.05rem; padding:.8rem 1rem; border-radius:14px;
       box-shadow: 0 10px 30px -10px rgba(123,108,255,.8); }
   div.stButton > button[kind="primary"]:hover { background:#8E81FF; }
-
   button[data-baseweb="tab"] p { font-size:1rem; }
-  div[data-baseweb="tab-highlight"] { background: var(--brand); }
-</style>
+  div[data-baseweb="tab-highlight"] { background: var(--brand); }</style>
 """, unsafe_allow_html=True)
 
 
