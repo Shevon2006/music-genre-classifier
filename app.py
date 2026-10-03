@@ -797,8 +797,8 @@ with tab_about:
             st.dataframe(pd.DataFrame({
                 "Algorithm": ["XGBoost", "Random Forest", "SVM (RBF)", "KNN",
                               "Decision Tree", "Logistic Regression"],
-                "Accuracy": [0.823, 0.810, 0.755, 0.735, 0.709, 0.665],
-                "Macro F1": [0.810, 0.794, 0.736, 0.714, 0.688, 0.645],
+                "Accuracy": [0.832, 0.811, 0.755, 0.735, 0.709, 0.663],
+                "Macro F1": [0.818, 0.796, 0.736, 0.714, 0.688, 0.643],
             }), hide_index=True, width="stretch")
     with c2:
         with st.container(border=True):
