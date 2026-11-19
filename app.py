@@ -50,8 +50,6 @@ DEFAULTS = dict(dance=0.55, energy=0.55, valence=0.50, acoustic=0.35, instr=0.10
                 speech=0.07, live=0.15, tempo=120, loud=-9.0, minutes=3.3, popl=40,
                 explicit=False, mode_name="Major")
 
-# Each preset is built around the typical values of one genre in the dataset,
-# and was checked to predict that genre with high confidence.
 PRESETS = {
     "Festival":    dict(genre="edm", icon=":material/graphic_eq:",
                         values=dict(dance=0.68, energy=0.90, valence=0.45, acoustic=0.02, instr=0.40,
@@ -268,20 +266,6 @@ st.markdown("""
       box-shadow:0 8px 22px -10px rgba(123,108,255,.95), inset 0 1px 0 rgba(255,255,255,.22); }
   div[data-testid="stTabs"] [data-testid="stTab"][data-focus-visible] { box-shadow:0 0 0 2px #0F0D17, 0 0 0 4px #B8AEFF !important; }
   div[data-testid="stTabs"] .react-aria-SelectionIndicator { display:none !important; }
-  /* ---------- chat (Ask the model) ---------- */
-  div[data-testid="stChatMessage"] { background:#1A1725 !important; border:1px solid var(--line);
-      border-radius:16px; padding:.9rem 1.1rem; margin-bottom:.7rem; }
-  div[data-testid="stChatMessage"]:has(img[alt="user avatar"]),
-  div[data-testid="stChatMessageAvatarUser"] ~ div { background:#211C33 !important; }
-  div[data-testid="stChatMessage"] p { font-size:.93rem; line-height:1.55; }
-  div[data-testid="stChatMessage"] table { font-size:.85rem; margin:.5rem 0; }
-  div[data-testid="stChatMessage"] th { color:#B8AEFF !important; font-weight:600; }
-  div[data-testid="stChatMessage"] code { background:#2A2440; color:#CFC6FF; padding:.1rem .35rem;
-      border-radius:5px; font-size:.85em; }
-  div[data-testid="stChatInput"] { background:#1A1725 !important; border:1px solid var(--line) !important;
-      border-radius:14px !important; }
-  div[data-testid="stChatInput"]:focus-within { border-color:var(--brand) !important;
-      box-shadow:0 0 0 4px rgba(123,108,255,.18); }
   /* ---------- radio + toggle accents ---------- */
   div[data-testid="stRadio"] label p, div[data-testid="stCheckbox"] label p { font-size:.9rem; }
   @media (prefers-reduced-motion: reduce){
@@ -296,11 +280,6 @@ st.markdown("""
 def load_model_and_artifacts():
     return (joblib.load(BASE_DIR / "best_model.pkl"),
             joblib.load(BASE_DIR / "preprocessing_artifacts.pkl"))
-
-
-@st.cache_data
-def load_songs():
-    return pd.read_csv(BASE_DIR / "song_lookup.csv")
 
 
 @st.cache_data
@@ -339,10 +318,9 @@ def hero_data_uri():
 
 try:
     model, ART = load_model_and_artifacts()
-    songs = load_songs()
 except FileNotFoundError as err:
-    st.error(f"Missing file: {err.filename}. Keep best_model.pkl, "
-             "preprocessing_artifacts.pkl and song_lookup.csv next to app.py.")
+    st.error(f"Missing file: {err.filename}. Keep best_model.pkl and "
+             "preprocessing_artifacts.pkl next to app.py.")
     st.stop()
 
 SCALER, LABELS = ART["scaler"], ART["label_encoder"]
@@ -599,8 +577,6 @@ def show_stage(body_html):
 
 
 # Ambient background: a few logos drifting slowly behind the page ---------------
-# One logo per horizontal lane, so they never collide and cover the whole screen.
-# Lanes alternate direction; negative delays spread them across the width on load.
 AMBIENT = [
     # lane top, width px, travel time, start offset, opacity, blur, tilt range, reverse
     ("4vh",  46, "58s", "-8s",  .20, "0px",   ("-14deg", "10deg"), False),
@@ -652,75 +628,6 @@ def ambient_layer():
         pass  # older Streamlit without script support: skip the effect
 
 
-# --- Intent table -------------------------------------------------------------
-INTENTS = [
-    (["accurate", "accuracy", "how good", "how well", "performance", "precision",
-      "recall", "f1 score", "score", "metric"], _a_accuracy),
-    (["why xgboost", "why did you choose", "which model", "best model", "compare model",
-      "other model", "six model", "6 model", "algorithm compar", "leaderboard",
-      "why this model", "model selection"], _a_why_xgboost),
-    (["how does xgboost", "how does it work", "how does the model work", "boosting",
-      "gradient boost", "explain xgboost", "what is xgboost", "how it works"], _a_how_works),
-    (["overfit", "memoris", "memoriz", "100%", "training accuracy", "train accuracy",
-      "generalis", "generaliz"], _a_overfitting),
-    (["cross valid", "cross-valid", "k-fold", "kfold", "5-fold", "5 fold", "validation method",
-      "stratified"], _a_cv),
-    (["weakest", "strongest", "best genre", "worst genre", "struggle", "which genre",
-      "per genre", "per-genre", "hardest"], _a_best_worst),
-    (["confus", "mistake", "mix up", "mixes up", "wrong", "error", "misclassif"], _a_confusion),
-    (["10 genre", "ten genre", "114", "why only", "all genres", "more genres",
-      "genre selection"], _a_ten_genres),
-    (["feature importance", "which feature", "what feature", "important feature",
-      "features used", "how many feature", "input"], _a_features),
-    (["preprocess", "pre-process", "cleaning", "clean the data", "data prep", "pipeline step",
-      "scaling", "scaler", "outlier", "duplicate"], _a_preprocessing),
-    (["split", "train test", "training set", "test set", "how much data",
-      "how many tracks"], _a_split),
-    (["dataset", "data source", "kaggle", "where did the data", "spotify data"], _a_dataset),
-    (["who did", "team", "member", "group", "contribution"], _a_team),
-    (["how do you predict", "prediction work", "how does prediction", "what happens when",
-      "behind the scenes", "pipeline"], _a_pipeline),
-    (["macro f1", "why f1", "why macro", "why that metric", "imbalance"], _a_macro_f1),
-    (["limitation", "weakness", "drawback", "problem with", "what's wrong"], _a_limitations),
-    (["improve", "better", "future work", "next step", "enhance"], _a_improve),
-    (["why did you predict", "why this result", "explain the prediction", "last prediction",
-      "that prediction", "this prediction", "why that genre"], _a_last_prediction),
-]
-
-
-def bot_answer(question: str) -> str:
-    q = question.lower().strip()
-    F = model_facts()
-
-    # A genre named on its own takes priority — "how about jazz?"
-    for g in GENRES:
-        if re.search(rf"\b{re.escape(g)}\b", q) or (g == "hip-hop" and "hip hop" in q):
-            if not any(k in q for k in ["confus", "all genre", "every genre", "which genre"]):
-                return _a_genre_detail(g, F)
-
-    # A feature named on its own — "what is danceability?"
-    for feat in FEATURE_GLOSSARY:
-        if re.search(rf"\b{re.escape(feat)}\b", q):
-            if not any(k in q for k in ["importance", "which feature", "what feature"]):
-                return _a_feature_detail(feat, F)
-
-    # Score each intent by how many of its phrases appear
-    best_fn, best_score = None, 0
-    for keys, fn in INTENTS:
-        score = sum(len(k) for k in keys if k in q)
-        if score > best_score:
-            best_fn, best_score = fn, score
-    if best_fn:
-        return best_fn(F)
-
-    return ("I'm not sure about that one — I only know this project. Try asking about:\n\n"
-            "- **Performance** — accuracy, precision, recall, a specific genre\n"
-            "- **The model** — why XGBoost, how boosting works, overfitting, cross-validation\n"
-            "- **The data** — the dataset, preprocessing, the train/test split, why 10 genres\n"
-            "- **The features** — which matter most, or what any one of them means\n"
-            "- **This app** — how a prediction is made, or why the last result came out that way")
-
-
 ambient_layer()
 
 # Header -----------------------------------------------------------------------
@@ -752,8 +659,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-tab_build, tab_song, tab_ask, tab_about = st.tabs(
-    ["Build a track", "Try a real song", "Ask the model", "About the model"])
+tab_build, tab_about = st.tabs(["Build a track", "About the model"])
 
 # Tab 1 — build a track ----------------------------------------------------------
 with tab_build:
@@ -830,8 +736,7 @@ with tab_build:
             show_stage(STAGE_TEMPLATE.replace("__H__", str(STAGE_HEIGHT - 4))
                                      .replace("__BODY__", IDLE_BODY))
 
-
-# Tab 3 — about ----------------------------------------------------------------------
+# Tab 2 — about ----------------------------------------------------------------------
 with tab_about:
     c1, c2 = st.columns([1.2, 1], gap="large")
     with c1:
